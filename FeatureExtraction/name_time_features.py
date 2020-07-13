@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pickle as pkl
 
 fileName = 'all_user_chunks'
-USER_COUNT = 15
+USER_COUNT = 2
 feature_number_from_tfidf = 5000
 
 
@@ -14,6 +14,8 @@ def count_word_occurrence(dict, segment):
             dict[word] = dict[word] + 1
     return dict
 
+def tokenizer(s):
+   return s.split(' ')
 
 def tidf_n_grams(all_user_chunks):
     words_per_user = []
@@ -29,7 +31,7 @@ def tidf_n_grams(all_user_chunks):
                     n_gram_1 = n_gram_2
                     n_gram_2 = n_gram_3
         words_per_user.append(n_gram_str[:-1])
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(tokenizer=tokenizer)
     X = vectorizer.fit_transform(words_per_user)
     dense = X.todense()
     denselist = dense.tolist()
@@ -90,11 +92,11 @@ def get_all_features_of_all_users():
     fileObject2 = open(fileName, 'rb')
     all_user_chunks = pkl.load(fileObject2)
     fileObject2.close()
-    with open('all_users_hour_name_tuples', 'wb') as fp:
+    with open('all_users_hour_name_tuples', 'rb') as fp:
         all_user_hour_name_dict = pkl.load(fp)
     all_features_of_all_users = []
     # build the tfidf of all the users with 3 ngrams
-    tidf_gram = tidf_n_grams(all_user_chunks)
+    tidf_gram = tidf_n_grams(all_user_chunks[0:2])
     for i in range(0, USER_COUNT):
         features_dns_name_tfidf = get_dns_name_tfidf(i, tidf_gram, all_user_chunks[i])
         features_dns_name_and_hour = get_dns_name_and_hour(all_user_hour_name_dict[i], all_user_chunks[i])
