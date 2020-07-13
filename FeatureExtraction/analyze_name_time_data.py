@@ -9,6 +9,7 @@ Original file is located at
 
 import pandas as pd
 import pickle
+import pickle as pkl
 
 FILE_NAME = '/content/drive/My Drive/DNS_project/DNS_origional/dnsSummary_user'
 FILE_NAME_EXTRACTED = '../DNS_time_name_extracted/dnsSummary_user'
@@ -17,6 +18,7 @@ NUMBER_OF_USERS = 15
 DAYS = 7
 HOURS = 24
 EPOCH_DAY = 5
+
 
 def extract_time(user_data):
     num_days = round(user_data['frame.time_epoch'] / 3600 / 24)
@@ -52,13 +54,29 @@ def build_chunk_30_minutes(user_data):
 
 def build_users_chunks():
     all_users_chunks = []
-    for i in range(1, NUMBER_OF_USERS+1):
+    for i in range(1, NUMBER_OF_USERS + 1):
         user_data = pd.read_csv(FILE_NAME_EXTRACTED + str(i) + FILE_EXTENSION)
         all_users_chunks.append(build_chunk_30_minutes(user_data))
     with open('all_user_chunks', 'wb') as fp:
         pickle.dump(all_users_chunks, fp)
 
 
+def build_empty_dictionaries():
+    file_all_user_chunks = open('all_user_chunks', 'rb')
+    all_user_chunks = pkl.load(file_all_user_chunks)
+    file_all_user_chunks.close()
+    all_users_dictionaries = []
+    for user in all_user_chunks:
+        tuples_for_user = {}
+        for chunk in user:
+            for tuple in chunk:
+                if (tuple[1], tuple[2]) not in tuples_for_user:
+                    tuples_for_user[(tuple[1], tuple[2])] = 0
+        all_users_dictionaries.append(tuples_for_user)
+    with open('all_users_hour_name_tuples', 'wb') as fp:
+        pickle.dump(all_users_dictionaries, fp)
+
+
 if __name__ == '__main__':
-    build_users_chunks()
+    build_empty_dictionaries()
 
