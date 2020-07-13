@@ -11,7 +11,7 @@ import pandas as pd
 import pickle
 
 FILE_NAME = '/content/drive/My Drive/DNS_project/DNS_origional/dnsSummary_user'
-FILE_NAME_EXTRACTED = '/content/drive/My Drive/DNS_project/DNS_time_name_extracted/dnsSummary_user'
+FILE_NAME_EXTRACTED = '../DNS_time_name_extracted/dnsSummary_user'
 FILE_EXTENSION = '.pcap.csv'
 NUMBER_OF_USERS = 15
 DAYS = 7
