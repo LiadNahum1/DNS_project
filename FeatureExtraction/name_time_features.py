@@ -76,6 +76,28 @@ def get_dns_name_tfidf(user_id, tfidf_grams, user_chunks):
     return words_per_user
 
 
+def get_dns_name_and_hour(user_id, user_chunks):
+    user_segments = []
+    file_of_user = open("FraudedRawData/User" + str(user_id), "r")
+    for i in range(0, SEGMENT_COUNT):
+        lines = []
+        for j in range(0, WORDS_COUNT_PER_SEGMENT):
+            lines.append(file_of_user.readline()[:-1])
+        dict = build_word_dict_feature_1()
+        segment_words_count = list(count_word_occurrence(dict, lines).values())
+        user_segments.append(segment_words_count)
+    return user_segments
+    
+    word_and_hours_dict = {}
+    for chunk in user_chunks:
+        for tuple in chunk:
+            word_and_hours_dict[(tuple[1], tuple[2])] = word_and_hours_dict[(tuple[1] , tuple[2])] + 1
+
+
+
+
+
+
 def get_all_features_of_all_users():
     fileObject2 = open(fileName, 'rb')
     all_user_chunks = pkl.load(fileObject2)
@@ -85,6 +107,7 @@ def get_all_features_of_all_users():
     tidf_gram = tidf_n_grams(all_user_chunks)
     for i in range(0, USER_COUNT):
         features_dns_name_tfidf = get_dns_name_tfidf(i, tidf_gram, all_user_chunks[i])
+        features_dns_name_and_hour = get_dns_name_and_hour(i, all_user_chunks[i])
 
 
 if __name__ == "__main__":
