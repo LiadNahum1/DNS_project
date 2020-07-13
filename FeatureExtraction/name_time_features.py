@@ -5,7 +5,15 @@ import pickle as pkl
 fileName = 'all_user_chunks'
 USER_COUNT = 15
 feature_number_from_tfidf = 5000
-# all user chunks = [user[chunk[day,hour,name]]]
+
+
+# returns a dictinary of the words in dict with the occurance of them in specific segment
+def count_word_occurrence(dict, segment):
+    for word in segment:
+        if word in dict:
+            dict[word] = dict[word] + 1
+    return dict
+
 
 def tidf_n_grams(all_user_chunks):
     words_per_user = []
@@ -39,13 +47,44 @@ def best_ngrams(user_id, n_grams_tidf):
     return best_ngrams
 
 
+def build_word_dict_dns_name_tfidf(best_ngrams):
+    ngrams_dict = dict()
+    for ngram in best_ngrams:
+        ngrams_dict[ngram] = 0
+    return ngrams_dict
+
+
+def get_dns_name_tfidf(user_id, tfidf_grams, user_chunks):
+    # get the top tfidf values that match to the current user id
+    top_user_ngrams = best_ngrams(user_id, tfidf_grams)
+    # for each chunk we save all the words in a list and than count hom much time each of the top user ngrams appear
+    # in this chunk
+    words_per_user = []
+    for chunk in user_chunks:
+        words_list = []
+        if len(chunk) >= 3:
+            n_gram_1 = chunk[0][2]
+            n_gram_2 = chunk[1][2]
+            for tuple in chunk:
+                n_gram_3 = tuple[2]
+                words_list.append(n_gram_1 + n_gram_2 + n_gram_3)
+                n_gram_1 = n_gram_2
+                n_gram_2 = n_gram_3
+        dict = build_word_dict_dns_name_tfidf(top_user_ngrams)
+        chunk_words_count = list(count_word_occurrence(dict, words_list).values())
+        words_per_user.append(chunk_words_count)
+    return words_per_user
+
+
 def get_all_features_of_all_users():
     fileObject2 = open(fileName, 'rb')
-    modelInput = pkl.load(fileObject2)
+    all_user_chunks = pkl.load(fileObject2)
     fileObject2.close()
-    tidf_gram = tidf_n_grams(modelInput)
-    for i in range(0,USER_COUNT):
-        top_user_ngrams = best_ngrams(i, tidf_gram)
+    all_features_of_all_users = []
+    # build the tfidf of all the users with 3 ngrams
+    tidf_gram = tidf_n_grams(all_user_chunks)
+    for i in range(0, USER_COUNT):
+        features_dns_name_tfidf = get_dns_name_tfidf(i, tidf_gram, all_user_chunks[i])
 
 
 if __name__ == "__main__":
