@@ -11,6 +11,8 @@ import pandas as pd
 import pickle
 import pickle as pkl
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 FILE_NAME = '/content/drive/My Drive/DNS_project/DNS_origional/dnsSummary_user'
 FILE_NAME_EXTRACTED = '../DNS_time_name_extracted/dnsSummary_user'
 FILE_EXTENSION = '.pcap.csv'
@@ -77,6 +79,33 @@ def build_empty_dictionaries():
         pickle.dump(all_users_dictionaries, fp)
 
 
+def tokenizer(s):
+    return s.split(' ')
+
+
+def tfidf_n_grams():
+    with open('all_user_chunks', 'rb') as fp:
+        all_user_chunks = pkl.load(fp)
+    words_per_user = []
+    for users_chunks in all_user_chunks:
+        n_gram_str = ""
+        for chunk in users_chunks:
+            if len(chunk) >= 3:
+                n_gram_1 = chunk[0][2]
+                n_gram_2 = chunk[1][2]
+                for tuple in chunk:
+                    n_gram_3 = tuple[2]
+                    n_gram_str = n_gram_str + n_gram_1 + n_gram_2 + n_gram_3 + " "
+                    n_gram_1 = n_gram_2
+                    n_gram_2 = n_gram_3
+        words_per_user.append(n_gram_str[:-1])
+    vectorizer = TfidfVectorizer(tokenizer=tokenizer)
+    X = vectorizer.fit_transform(words_per_user)
+    dense = X.todense()
+    denselist = dense.tolist()
+    tf_idf = pd.DataFrame(denselist, columns=vectorizer.get_feature_names())
+    tf_idf.to_csv('tf-idf.csv')
+
 if __name__ == '__main__':
-    build_empty_dictionaries()
+    tfidf_n_grams()
 

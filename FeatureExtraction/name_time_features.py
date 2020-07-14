@@ -2,8 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pickle as pkl
 
-fileName = 'all_user_chunks'
-USER_COUNT = 2
+USER_COUNT = 15
 feature_number_from_tfidf = 5000
 
 
@@ -14,8 +13,10 @@ def count_word_occurrence(dict, segment):
             dict[word] = dict[word] + 1
     return dict
 
+
 def tokenizer(s):
-   return s.split(' ')
+    return s.split(' ')
+
 
 def tidf_n_grams(all_user_chunks):
     words_per_user = []
@@ -46,7 +47,7 @@ def best_ngrams(user_id, n_grams_tidf):
     n_grams_tidf_T = pd.DataFrame(data=n_grams_tidf.T)
     n_grams_tidf_T.columns = columns
     best_ngrams = n_grams_tidf_T.nlargest(feature_number_from_tfidf, f'user_{user_id}').index.to_list()
-    return best_ngrams
+    return best_ngrams #list of ngrams words
 
 
 def build_word_dict_dns_name_tfidf(best_ngrams):
@@ -75,7 +76,7 @@ def get_dns_name_tfidf(user_id, tfidf_grams, user_chunks):
         dict = build_word_dict_dns_name_tfidf(top_user_ngrams)
         chunk_words_count = list(count_word_occurrence(dict, words_list).values())
         words_per_user.append(chunk_words_count)
-    return words_per_user
+    return words_per_user, top_user_ngrams
 
 
 def get_dns_name_and_hour(user_hour_name_dict, user_chunks):
@@ -89,18 +90,23 @@ def get_dns_name_and_hour(user_hour_name_dict, user_chunks):
 
 
 def get_all_features_of_all_users():
-    fileObject2 = open(fileName, 'rb')
-    all_user_chunks = pkl.load(fileObject2)
-    fileObject2.close()
+    with open('all_user_chunks', 'rb') as fp:
+        all_user_chunks = pkl.load(fp)
     with open('all_users_hour_name_tuples', 'rb') as fp:
         all_user_hour_name_dict = pkl.load(fp)
-    all_features_of_all_users = []
     # build the tfidf of all the users with 3 ngrams
-    tidf_gram = tidf_n_grams(all_user_chunks[0:2])
+    tidf_gram = pd.read_csv('tf-idf.csv')
     for i in range(0, USER_COUNT):
-        features_dns_name_tfidf = get_dns_name_tfidf(i, tidf_gram, all_user_chunks[i])
+        features_dns_name_tfidf, dns_names_keys = get_dns_name_tfidf(i, tidf_gram, all_user_chunks[i])
         features_dns_name_and_hour = get_dns_name_and_hour(all_user_hour_name_dict[i], all_user_chunks[i])
-
+        columns = dns_names_keys
+        columns.extend(all_user_hour_name_dict[i].keys())
+        features_per_chunk = features_dns_name_tfidf
+        for chunk_index in range(0, len(features_per_chunk)):
+            features_per_chunk[chunk_index].extend(features_dns_name_and_hour[chunk_index])
+        features_for_user_i = pd.DataFrame(data=features_per_chunk, columns=columns)
+        print(features_for_user_i)
+        features_for_user_i.to_csv(f'features_user_{i+1}.csv')
 
 if __name__ == "__main__":
     get_all_features_of_all_users()
