@@ -1,27 +1,34 @@
 import pandas as pd
 from sklearn.svm import OneClassSVM
+import pickle as pkl
 
-TRAIN_PERCENT = 0.9
-TEST_PERCENT = 0.1
-USER_COUNT = 15
+from FeatureExtraction.name_time_features import build_features_for_chunk, TRAIN_PERCENT
 
 
 def build_train_samples(user_id):
-    features_of_user_id = pd.read_csv(f'features_user_{user_id}.csv')
+    features_of_user_id = pd.read_csv(f'../../FeatureExtraction/FeaturesPerUser/features_user_{user_id}.csv')
     train_size = round(len(features_of_user_id) * TRAIN_PERCENT)
     train_samples = features_of_user_id[0:train_size]  # only positive samples
     return train_samples
 
-
-def build_test_samples(user_id, other_user_id):
-    features_of_user_id = pd.read_csv(f'features_user_{user_id}.csv')
-    train_size = round(len(features_of_user_id) * TRAIN_PERCENT)
-    test_samples = features_of_user_id[train_size:]
+#user_id is the user that we check if the chunk belongs to him
+def build_test_samples(user_id):
+    with open('all_user_chunks', 'rb') as fp:
+        all_user_chunks = pkl.load(fp)
+    test_samples = []
+    for i in range(0, len(all_user_chunks)):
+        user = all_user_chunks[i]
+        train_size = round(len(user) * TRAIN_PERCENT)
+        for chunk in user[train_size:]:
+            test_samples.append(build_features_for_chunk(user_id, chunk))
     return test_samples
 
 
-def main(user_id, other_user_id):
+def main(user_id):
     train_samples = build_train_samples(user_id)
-    test_samples = build_test_samples(user_id, other_user_id)
+    test_samples = build_test_samples(user_id)
     clf = OneClassSVM(gamma='auto').fit(train_samples)
-    print(clf.predict(test_samples))
+    print(pd.Series(clf.predict(test_samples)).value_counts())
+
+if __name__ == "__main__":
+    main(1)
