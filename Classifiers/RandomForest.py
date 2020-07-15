@@ -50,10 +50,18 @@ def build_test_samples(user_id, name_time_features):
         all_user_chunks = pkl.load(fp)
     test_samples = []
     for i in range(0, len(all_user_chunks)):
-        user = all_user_chunks[i]
-        train_size = round(len(user) * TRAIN_PERCENT)
-        for chunk in user[train_size:]:
-            test_samples.append(name_time_features.build_features_for_chunk(user_id, chunk))
+        if i != user_id:
+            user = all_user_chunks[i]
+            train_size = round(len(user) * TRAIN_PERCENT)
+            test_size = round(len(user) * TRAIN_PERCENT_OF_OTHER_USERS)
+            for chunk in user[train_size:train_size+test_size]: #10 percent
+                test_samples.append(name_time_features.build_features_for_chunk(user_id, chunk))
+        else:
+            user = all_user_chunks[i]
+            train_size = round(len(user) * TRAIN_PERCENT)
+            print(len(user[train_size:]))
+            for chunk in user[train_size:]: #30 percent
+                test_samples.append(name_time_features.build_features_for_chunk(user_id, chunk))
     return test_samples
 
 
@@ -65,12 +73,12 @@ def write_train_test_sets(user_id):
     test_set = pd.DataFrame(data=test_samples, columns=features_names)
     test_set.to_csv(f'../FileCenter/FeaturesPerUser/user1_test_features.csv')
     print('test done')
-    features_names.append('label')
-    train_samples = build_train_samples(user_id, name_time_features)
-    train_set = pd.DataFrame(data=train_samples, columns=features_names)
-    print(train_set)
-    train_set.to_csv(f'../FileCenter/FeaturesPerUser/user1_train_features.csv')
-    print('train done')
+    #features_names.append('label')
+    #train_samples = build_train_samples(user_id, name_time_features)
+    #train_set = pd.DataFrame(data=train_samples, columns=features_names)
+    #print(train_set)
+    #train_set.to_csv(f'../FileCenter/FeaturesPerUser/user1_train_features.csv')
+    #print('train done')
 
 
 
@@ -83,15 +91,17 @@ def main(user_id):
     x_train = train_set.iloc[:, :-1]
     print(x_train)
     clf.fit(x_train, train_set['label'])
-    predicted = clf.predict(test_set[:2000])
+    predicted = clf.predict(test_set)
     with open('../FileCenter/predicted', 'wb') as fp:
         pickle.dump(predicted, fp)
-    print(predicted)
+    predicted1 = predicted[:431]
+    predicted2 = print(predicted[431:])
+    print(len(predicted))
 
 
 if __name__ == "__main__":
     write_train_test_sets(1)
-    main(1)
-    with open('../FileCenter/predicted', 'rb') as fp:
-        predicted = pkl.load(fp)
-    print(predicted)
+    #main(1)
+    #with open('../FileCenter/predicted', 'rb') as fp:
+     #   predicted = pkl.load(fp)
+    #print(predicted)
