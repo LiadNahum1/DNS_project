@@ -9,7 +9,7 @@ feature_number_from_tfidf = 5000
 
 class NameTimeFeatures:
     def __init__(self):
-        self.tfidf_grams = pd.read_csv('../FileCenter/tfidf_ngrams.csv')
+        self.tfidf_grams = pd.read_csv('../FileCenter/tfidf.csv')
         with open('../FileCenter/all_users_hour_name_tuples', 'rb') as fp:
             self.all_user_hour_name_dict = pkl.load(fp)
 
@@ -43,7 +43,7 @@ class NameTimeFeatures:
         # in this chunk
         words_per_user = []
         for chunk in user_chunks:
-            words_per_user.append(self.get_dns_name_tfidf_ngrams__per_chunk(chunk, top_user_ngrams))
+            words_per_user.append(self.get_dns_name_tfidf__per_chunk(chunk, top_user_ngrams))
         return words_per_user, top_user_ngrams
 
     def get_dns_name_and_hour(self, user_hour_name_dict, user_chunks):
@@ -66,23 +66,33 @@ class NameTimeFeatures:
         chunk_words_count = list(self.count_word_occurrence(dict, words_list).values())
         return chunk_words_count
 
+    def get_dns_name_tfidf__per_chunk(self, chunk, best_ngrams):
+        words_list = []
+        for tuple in chunk:
+            words_list.append(tuple[2])
+        dict = self.build_word_dict_dns_name_tfidf(best_ngrams)
+        chunk_words_count = list(self.count_word_occurrence(dict, words_list).values())
+        return chunk_words_count
+
     def get_dns_name_features(self, user_id, chunk):
         # get the top tfidf values that match to the current user id
         top_user_ngrams = self.best_ngrams(user_id)
-        return self.get_dns_name_tfidf_ngrams__per_chunk(chunk, top_user_ngrams)
+        return self.get_dns_name_tfidf__per_chunk(chunk, top_user_ngrams)
 
     def get_dns_name_and_hour__per_chunk(self, user_hour_name_dict, chunk):
         chunk_hour_name_dict = user_hour_name_dict.copy()
         for tuple in chunk:
-            chunk_hour_name_dict[(tuple[1], tuple[2])] = chunk_hour_name_dict[(tuple[1], tuple[2])] + 1
+            if (tuple[1], tuple[2]) in chunk_hour_name_dict:
+                chunk_hour_name_dict[(tuple[1], tuple[2])] = chunk_hour_name_dict[(tuple[1], tuple[2])] + 1
         return chunk_hour_name_dict.values()
 
     def get_dns_name_and_hour_features(self, user_id, chunk):
         return self.get_dns_name_and_hour__per_chunk(self.all_user_hour_name_dict[user_id], chunk)
 
-    def get_features_of_user(self,user_id):
+    def get_features_of_user(self, user_id):
         top_user_ngrams = self.best_ngrams(user_id)
-        return top_user_ngrams.extend(self.all_user_hour_name_dict[user_id].keys())
+        top_user_ngrams.extend(self.all_user_hour_name_dict[user_id].keys())
+        return top_user_ngrams
 
     def build_features_for_chunk(self, user_id, chunk):
         feature_dns_name_tfidf = self.get_dns_name_features(user_id, chunk)
@@ -90,6 +100,7 @@ class NameTimeFeatures:
         features_of_chunk = feature_dns_name_tfidf
         features_of_chunk.extend(features_dns_name_and_hour)
         return features_of_chunk
+
 
 
 def tokenizer(s):
@@ -128,7 +139,24 @@ def build_tidf_n_grams():
     tf_idf = pd.DataFrame(denselist, columns=vectorizer.get_feature_names())
     tf_idf.to_csv('tfidf_ngrams.csv')
 
+# build tfidf with no ngrams only on train set
+def build_tidf():
+    with open('../FileCenter/all_user_chunks', 'rb') as fp:
+        all_user_chunks = pkl.load(fp)
+    train_user_chunks = get_train_chunks(all_user_chunks)
+    words_per_user = []
+    for users_chunks in train_user_chunks:
+        n_gram_str = ""
+        for chunk in users_chunks:
+            for tuple in chunk:
+                n_gram_str = n_gram_str + tuple[2] + " "
+        words_per_user.append(n_gram_str[:-1])
+    vectorizer = TfidfVectorizer(tokenizer=tokenizer)
+    X = vectorizer.fit_transform(words_per_user)
+    dense = X.todense()
+    denselist = dense.tolist()
+    tf_idf = pd.DataFrame(denselist, columns=vectorizer.get_feature_names())
+    tf_idf.to_csv('tfidf.csv')
 
 if __name__ == "__main__":
-    o = NameTimeFeatures()
-    o.get_features_of_user()
+    build_tidf()
