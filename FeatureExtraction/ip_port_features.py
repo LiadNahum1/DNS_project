@@ -10,8 +10,8 @@ Original file is located at
 import pandas as pd
 import pickle
 
-FILE_NAME = '/content/drive/My Drive/DNS_project/DNS_origional/dnsSummary_user'
-FILE_NAME_EXTRACTED = '/content/drive/My Drive/DNS_project/DNS_ip_port_extracted/dnsSummary_user'
+FILE_NAME = '/home/tom/Desktop/DNS_origional/dnsSummary_user'
+FILE_NAME_EXTRACTED = '/home/tom/PycharmProjects/DNS_project/DNS_ip_port_extracted/dnsSummary_user'
 FILE_EXTENSION = '.pcap.csv'
 NUMBER_OF_USERS = 15
 
@@ -19,11 +19,8 @@ NUMBER_OF_USERS = 15
 def extract_features():
     for i in range(1, NUMBER_OF_USERS + 1):
         user_data = pd.read_csv(FILE_NAME + str(i) + FILE_EXTENSION)
-        req_data = user_data.iloc[::2]
-        req_data = req_data[['ip.dst', 'ip.src', 'udp.srcport','udp.dstport','dns.time']]
-        response_data = user_data.iloc[1::2]
-        response_data = response_data[['ip.dst', 'ip.src', 'udp.srcport','udp.dstport','dns.time']]
-        user_data = req_data + response_data
+        user_data = user_data[['ip.dst', 'ip.src', 'udp.srcport','udp.dstport','dns.time']]
+        user_data = user_data.dropna()
         user_data.to_csv(FILE_NAME_EXTRACTED + str(i) + FILE_EXTENSION)
 
 
@@ -50,5 +47,5 @@ def build_users_chunks():
 
 
 if __name__ == '__main__':
-    build_users_chunks()
+    extract_features()
 
