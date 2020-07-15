@@ -11,8 +11,6 @@ import pandas as pd
 import pickle
 import pickle as pkl
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-
 FILE_NAME = '/content/drive/My Drive/DNS_project/DNS_origional/dnsSummary_user'
 FILE_NAME_EXTRACTED = '../DNS_time_name_extracted/dnsSummary_user'
 FILE_EXTENSION = '.pcap.csv'
@@ -20,7 +18,7 @@ NUMBER_OF_USERS = 15
 DAYS = 7
 HOURS = 24
 EPOCH_DAY = 5
-
+DNS_PORT = 53
 
 def extract_time(user_data):
     num_days = round(user_data['frame.time_epoch'] / 3600 / 24)
@@ -35,7 +33,7 @@ def extract_time(user_data):
 def extract_features():
     for i in range(1, NUMBER_OF_USERS + 1):
         user_data = pd.read_csv(FILE_NAME + str(i) + FILE_EXTENSION)
-        user_data = user_data.iloc[::2]
+        user_data = user_data.loc[user_data['udp.dstport'] == DNS_PORT]
         user_data = user_data[['frame.time_epoch', 'frame.time_relative', 'dns.qry.name']]
         new_user_data = extract_time(user_data)
         new_user_data.to_csv(FILE_NAME_EXTRACTED + str(i) + FILE_EXTENSION)
@@ -81,5 +79,6 @@ def build_empty_dictionaries():
 
 
 if __name__ == '__main__':
-  pass
+    build_users_chunks()
+    build_empty_dictionaries()
 

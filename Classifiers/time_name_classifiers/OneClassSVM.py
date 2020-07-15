@@ -13,10 +13,10 @@ def build_train_samples(user_id):
 
 #user_id is the user that we check if the chunk belongs to him
 def build_test_samples(user_id):
-    with open('all_user_chunks', 'rb') as fp:
+    with open('../../FeatureExtraction/all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
     test_samples = []
-    for i in range(0, len(all_user_chunks)):
+    for i in range(0, 2):
         user = all_user_chunks[i]
         train_size = round(len(user) * TRAIN_PERCENT)
         for chunk in user[train_size:]:
