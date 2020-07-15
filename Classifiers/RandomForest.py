@@ -73,12 +73,12 @@ def write_train_test_sets(user_id):
     test_set = pd.DataFrame(data=test_samples, columns=features_names)
     test_set.to_csv(f'../FileCenter/FeaturesPerUser/user1_test_features.csv')
     print('test done')
-    #features_names.append('label')
-    #train_samples = build_train_samples(user_id, name_time_features)
-    #train_set = pd.DataFrame(data=train_samples, columns=features_names)
-    #print(train_set)
-    #train_set.to_csv(f'../FileCenter/FeaturesPerUser/user1_train_features.csv')
-    #print('train done')
+    features_names.append('label')
+    train_samples = build_train_samples(user_id, name_time_features)
+    train_set = pd.DataFrame(data=train_samples, columns=features_names)
+    print(train_set)
+    train_set.to_csv(f'../FileCenter/FeaturesPerUser/user1_train_features.csv')
+    print('train done')
 
 
 
@@ -94,14 +94,12 @@ def main(user_id):
     predicted = clf.predict(test_set)
     with open('../FileCenter/predicted', 'wb') as fp:
         pickle.dump(predicted, fp)
-    predicted1 = predicted[:431]
-    predicted2 = print(predicted[431:])
-    print(len(predicted))
 
 
 if __name__ == "__main__":
     write_train_test_sets(1)
-    #main(1)
-    #with open('../FileCenter/predicted', 'rb') as fp:
-     #   predicted = pkl.load(fp)
-    #print(predicted)
+    main(1)
+    with open('../FileCenter/predicted', 'rb') as fp:
+        predicted = pkl.load(fp)
+    print(pd.Series(predicted[0:403]).value_counts())
+    print(pd.Series(predicted[403:]).value_counts())
