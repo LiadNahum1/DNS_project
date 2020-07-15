@@ -10,14 +10,17 @@ feature_number_from_tfidf = 5000
 def tokenizer(s):
     return s.split(' ')
 
+def get_train_chunks(all_user_chunks):
+    train_user_chunks = []
+    for user in all_user_chunks:
+        train_user_chunks.append(user[0:round(len(user) * TRAIN_PERCENT)])
+    return train_user_chunks
 
 # build tfidf ngrams only on train set
 def build_tidf_n_grams():
     with open('all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
-    train_user_chunks = []
-    for user in all_user_chunks:
-        train_user_chunks.append(user[0:round(len(user) * TRAIN_PERCENT)])
+    train_user_chunks = get_train_chunks(all_user_chunks)
     words_per_user = []
     for users_chunks in train_user_chunks:
         n_gram_str = ""
@@ -66,7 +69,7 @@ def count_word_occurrence(dict, segment):
 
 
 def get_dns_name_tfidf(user_id, user_chunks):
-    tfidf_grams = pd.read_csv('tfidf_ngrams.csv')
+    tfidf_grams = pd.read_csv('../tfidf_ngrams.csv')
     # get the top tfidf values that match to the current user id
     top_user_ngrams = best_ngrams(user_id, tfidf_grams)
     # for each chunk we save all the words in a list and than count how much time each of the top user ngrams appear
@@ -101,7 +104,7 @@ def get_dns_name_tfidf_ngrams__per_chunk(chunk, best_ngrams):
 
 def get_dns_name_features(user_id, chunk):
     # get the top tfidf values that match to the current user id
-    tfidf_grams = pd.read_csv('tfidf_ngrams.csv')
+    tfidf_grams = pd.read_csv('../tfidf_ngrams.csv')
     top_user_ngrams = best_ngrams(user_id, tfidf_grams)
     return get_dns_name_tfidf_ngrams__per_chunk(chunk, top_user_ngrams)
 
@@ -136,10 +139,16 @@ def build_train_samples():
         print(features_for_user_i)
         features_for_user_i.to_csv(f'FeaturesPerUser/features_user_{i + 1}.csv')
 
+def get_features_of_user(user_id):
+    tfidf_grams = pd.read_csv('DNS_project/tfidf_ngrams.csv')
+    top_user_ngrams = best_ngrams(user_id, tfidf_grams)
+    with open('all_users_hour_name_tuples', 'rb') as fp:
+        all_user_hour_name_dict = pkl.load(fp)
+    return top_user_ngrams.extend(all_user_hour_name_dict[user_id].keys())
 
 def build_features_for_chunk(user_id, chunk):
     feature_dns_name_tfidf = get_dns_name_features(user_id, chunk)
-    features_dns_name_and_hour = get_dns_name_and_hour(user_id, chunk)
+    features_dns_name_and_hour = get_dns_name_and_hour_features(user_id, chunk)
     features_of_chunk = feature_dns_name_tfidf
     for chunk_index in range(0, len(features_of_chunk)):
         features_of_chunk[chunk_index].extend(features_dns_name_and_hour[chunk_index])
@@ -147,4 +156,4 @@ def build_features_for_chunk(user_id, chunk):
 
 
 if __name__ == "__main__":
-    build_train_samples()
+    build_tidf_n_grams()
