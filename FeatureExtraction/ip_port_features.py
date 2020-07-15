@@ -42,7 +42,7 @@ def build_users_chunks():
     for i in range(1, NUMBER_OF_USERS+1):
         user_data = pd.read_csv(FILE_NAME_EXTRACTED + str(i) + FILE_EXTENSION)
         all_users_chunks.append(build_chunk_30_minutes(user_data))
-    with open('all_user_chunks', 'wb') as fp:
+    with open('../FileCenter/all_user_chunks', 'wb') as fp:
         pickle.dump(all_users_chunks, fp)
 
 

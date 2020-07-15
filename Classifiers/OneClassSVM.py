@@ -13,7 +13,7 @@ def build_train_samples(user_id):
 
 #user_id is the user that we check if the chunk belongs to him
 def build_test_samples(user_id):
-    with open('../../FeatureExtraction/all_user_chunks', 'rb') as fp:
+    with open('../FileCenter/all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
     test_samples = []
     for i in range(0, 2):
