@@ -20,6 +20,7 @@ HOURS = 24
 EPOCH_DAY = 5
 DNS_PORT = 53
 
+
 def extract_time(user_data):
     num_days = round(user_data['frame.time_epoch'] / 3600 / 24)
     day = (num_days + EPOCH_DAY) % DAYS + 1
@@ -77,8 +78,6 @@ def build_empty_dictionaries():
         pickle.dump(all_users_dictionaries, fp)
 
 
-
 if __name__ == '__main__':
     build_users_chunks()
     build_empty_dictionaries()
-

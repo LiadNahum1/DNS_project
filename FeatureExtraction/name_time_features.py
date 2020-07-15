@@ -4,7 +4,7 @@ import pickle as pkl
 
 USER_COUNT = 15
 TRAIN_PERCENT = 0.7
-feature_number_from_tfidf = 5000
+FEATURE_NUMBER_FROM_TFIDF = 5000
 
 
 class NameTimeFeatures:
@@ -20,7 +20,7 @@ class NameTimeFeatures:
             columns.append(f'user_{i}')
         n_grams_tidf_T = pd.DataFrame(data=self.tfidf_grams.T)
         n_grams_tidf_T.columns = columns
-        best_ngrams = n_grams_tidf_T.nlargest(feature_number_from_tfidf, f'user_{user_id}').index.to_list()
+        best_ngrams = n_grams_tidf_T.nlargest(FEATURE_NUMBER_FROM_TFIDF, f'user_{user_id}').index.to_list()
         return best_ngrams  # list of ngrams words
 
     def build_word_dict_dns_name_tfidf(self, best_ngrams):
