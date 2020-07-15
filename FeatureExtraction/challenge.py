@@ -7,7 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
 
-from FeatureExtraction.time_name_features import all_users_chunks
+from FeatureExtraction.analyze_name_time_data import all_users_chunks
 
 USER_COUNT = 40
 WORDS_COUNT_PER_SEGMENT = 100
@@ -201,12 +201,9 @@ def calculate_grade():
 
 
 if __name__ == "__main__":
-    print(len(all_users_chunks))
-    '''
     os.remove("predicted.csv")
     tidf_grams = tidf_n_grams()
     all_features_of_all_users = get_all_features_of_all_users(tidf_grams)
     for user_id in range(0, USER_COUNT):
         train_model(user_id, all_features_of_all_users)
     calculate_grade()
-    '''
