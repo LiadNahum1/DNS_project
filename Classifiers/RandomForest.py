@@ -50,7 +50,9 @@ def build_test_samples(user_id, name_time_features):
     with open('../FileCenter/all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
     test_samples = []
+    print(user_id)
     for i in range(0, len(all_user_chunks)):
+        print("enter")
         if i != user_id:
             user = all_user_chunks[i]
             train_size = round(len(user) * TRAIN_PERCENT)
@@ -95,9 +97,9 @@ def predict(user_id):
 
 
 if __name__ == "__main__":
-    #write_train_test_sets(1)
-    #predict(1)
+    write_train_test_sets(1)
+    predict(1)
     with open('../FileCenter/predicted', 'rb') as fp:
         predicted = pkl.load(fp)
+    print(pd.Series(predicted[:403]).value_counts())
     print(pd.Series(predicted).value_counts())
-
