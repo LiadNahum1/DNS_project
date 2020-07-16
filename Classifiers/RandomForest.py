@@ -58,12 +58,16 @@ def build_test_samples(user_id, name_time_features):
             train_size = round(len(user) * TRAIN_PERCENT)
             test_size = round(len(user) * TRAIN_PERCENT_OF_OTHER_USERS)
             for chunk in user[train_size:train_size + test_size]:  # 10 percent
-                test_samples.append(name_time_features.build_features_for_chunk(user_id, chunk))
+                features_for_chunk = name_time_features.build_features_for_chunk(user_id, chunk)
+                features_for_chunk.append(1 - BELONG_LABEL)
+                test_samples.append(features_for_chunk)
         else:
             user = all_user_chunks[i]
             train_size = round(len(user) * TRAIN_PERCENT)
             for chunk in user[train_size:]:  # 30 percent
-                test_samples.append(name_time_features.build_features_for_chunk(user_id, chunk))
+                features_for_chunk = name_time_features.build_features_for_chunk(user_id, chunk)
+                features_for_chunk.append(BELONG_LABEL)
+                test_samples.append(features_for_chunk)
             # print(f'the len of the test samples {len(test_samples)}')
     return test_samples
 
@@ -72,28 +76,26 @@ def write_train_test_sets(user_id):
     name_time_features = NameTimeFeatures()
     features_names = name_time_features.get_features_of_user(user_id)
 
-    test_samples = build_test_samples(user_id, name_time_features)
-    test_set = pd.DataFrame(data=test_samples, columns=features_names)
-
     features_names.append('label')
     train_samples = build_train_samples(user_id, name_time_features)
     train_set = pd.DataFrame(data=train_samples, columns=features_names)
+
+    test_samples = build_test_samples(user_id, name_time_features)
+    test_set = pd.DataFrame(data=test_samples, columns=features_names)
 
     print('train\n')
     print(train_set)
     print('test\n')
     print(test_set)
 
-
     # features selection by fisher score
     indexes_by_fisher_score = fisher_score_selection(train_set)
-    test_set = test_set.iloc[:, indexes_by_fisher_score]
-    print(test_set)
     label_column_index = len(train_set.columns) - 1
     indexes_by_fisher_score.append(label_column_index)
     train_set = train_set.iloc[:, indexes_by_fisher_score]
     print(train_set)
-
+    test_set = test_set.iloc[:, indexes_by_fisher_score]
+    print(test_set)
 
     # write into files
     train_set.to_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_train_features.csv')
@@ -108,15 +110,15 @@ def predict(user_id):
     # build random forest
     clf = RandomForestClassifier(n_estimators=NUM_OF_ESTIMATORS)
     x_train = train_set.iloc[:, :-1]
-    print(len(test_set))
     clf.fit(x_train, train_set['label'])
-    predicted = clf.predict(test_set)
+    x_test = test_set.iloc[:, :-1]
+    predicted = clf.predict(x_test)
     with open('../FileCenter/predicted', 'wb') as fp:
         pickle.dump(predicted, fp)
 
 
 if __name__ == "__main__":
-    write_train_test_sets(0)
+    #write_train_test_sets(0)
     predict(0)
     with open('../FileCenter/predicted', 'rb') as fp:
         predicted = pkl.load(fp)
