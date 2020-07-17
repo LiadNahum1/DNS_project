@@ -2,6 +2,8 @@ import pickle
 import pandas as pd
 import numpy
 
+NUMBER_OF_USERS = 15
+
 
 def get_false_positive_rate(test_set, predicted):
     real_positive = test_set.loc[test_set['label'] == 1].index.tolist()
@@ -21,8 +23,8 @@ def get_false_negative_rate(test_set, predicted):
     return false_negative / real_positive
 
 
-def main(user_id):
-    with open('FileCenter/predicted', 'rb') as fp:
+def main(user_id, classifier_name):
+    with open(f'FileCenter/predicted_{classifier_name}', 'rb') as fp:
         predicted = pickle.load(fp)
     test_set = pd.read_csv(f'FileCenter/FeaturesPerUser/user{user_id}_test_features.csv')
     print(f'false positive rate {get_false_positive_rate(test_set, predicted)}')
@@ -30,4 +32,4 @@ def main(user_id):
 
 
 if __name__ == '__main__':
-    main(0)
+    main(0, "KNeighbors")
