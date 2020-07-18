@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
-from Classifiers import Build_test_and_train
+from Classifiers import build_test_and_train
 from FeatureExtraction.name_time_features import *
 import pickle
 

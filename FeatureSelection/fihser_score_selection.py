@@ -3,7 +3,7 @@ import numpy
 P_VALUE_THRESHOLD = 0.5
 
 
-def fisher_score_selection(train_set):
+def fisher_score_selection(train_set, fisher_score_threshold):
     x_train = train_set.iloc[:, :-1]
     y_train = train_set['label']
     f_score = chi2(x_train, y_train)

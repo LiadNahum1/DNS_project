@@ -1,9 +1,9 @@
 import pickle
 
 from sklearn.ensemble import RandomForestClassifier
-from Classifiers import Build_test_and_train
 from FeatureExtraction.name_time_features import *
-
+from sklearn.metrics import plot_confusion_matrix
+import matplotlib.pyplot as plt
 
 NUM_OF_ESTIMATORS = 500
 
@@ -19,6 +19,8 @@ def predict(user_id):
     predicted = clf.predict(x_test)
     with open('../FileCenter/predicted_random_forest', 'wb') as fp:
         pickle.dump(predicted, fp)
+    plot_confusion_matrix(clf, x_test, test_set['label'], normalize='true')  # doctest: +SKIP
+    plt.show()
 
 
 if __name__ == "__main__":
