@@ -1,8 +1,21 @@
+from Classifiers.KNearestNeighbors import KNearestNeighbors
+from Classifiers.NearestCentroid import NearestCentroid
+from Classifiers.NeuralNetwork import NeuralNetwork
+from Classifiers.RandomForest import RandomForest
+from Classifiers.SVC import SVC
+
+KNEAREST_NEIGHBORS_IND = 0
+NEAREST_CENTROID_IND = 1
+NEURAL_NETWORK_IND = 2
+RANDOM_FOREST_IND = 3
+SVC_IND = 4
+
 userIps = [("173.27.225.202", 1), ("173.27.225.197", 2), ("173.27.225.182", 3), ("173.27.225.164", 4),
            ("173.27.225.158", 5), ("173.27.225.153", 6), ("173.27.225.151", 7), ("173.27.225.144", 8),
            ("173.27.225.126", 9), ("173.27.225.118", 10), ("173.27.225.116", 11),
            ("173.27.225.115", 12), ("173.27.225.113", 13), ("173.27.225.111", 14), ("173.27.225.102", 15)]
 
+classifiers = [KNearestNeighbors(), NearestCentroid(), NeuralNetwork(), RandomForest(), SVC()]
 
 def checkMyIp(x):
     for ip in userIps:
