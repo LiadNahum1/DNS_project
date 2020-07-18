@@ -10,7 +10,7 @@ FEATURE_NUMBER_FROM_TFIDF = 5000
 class NameTimeFeatures:
     def __init__(self):
         self.tfidf_grams = pd.read_csv('../FileCenter/tfidf.csv')
-        with open('../FileCenter/all_users_hour_name_tuples', 'rb') as fp:
+        with open('../FileCenter/minimzed_data/all_users_hour_name_tuples', 'rb') as fp:
             self.all_user_hour_name_dict = pkl.load(fp)
 
     # taking top 1000 ngrams for specific user
@@ -116,7 +116,7 @@ def get_train_chunks(all_user_chunks):
 
 # build tfidf ngrams only on train set
 def build_tidf_n_grams():
-    with open('../FileCenter/all_user_chunks', 'rb') as fp:
+    with open('../FileCenter/minimzed_data/all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
     train_user_chunks = get_train_chunks(all_user_chunks)
     words_per_user = []
@@ -141,7 +141,7 @@ def build_tidf_n_grams():
 
 # build tfidf with no ngrams only on train set
 def build_tidf():
-    with open('../FileCenter/all_user_chunks', 'rb') as fp:
+    with open('../FileCenter/minimzed_data/all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
     train_user_chunks = get_train_chunks(all_user_chunks)
     words_per_user = []
