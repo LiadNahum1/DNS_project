@@ -31,7 +31,7 @@ def get_train_samples_of_rest_users(all_user_chunks, user_id, name_time_features
 
 
 def build_train_samples(user_id, name_time_features):
-    with open('../FileCenter/all_user_chunks', 'rb') as fp:
+    with open('../FileCenter/minimzed_data/all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
     train_samples = get_train_samples_of_current_user(all_user_chunks, user_id, name_time_features)
     train_samples.extend(get_train_samples_of_rest_users(all_user_chunks, user_id, name_time_features))
@@ -40,7 +40,7 @@ def build_train_samples(user_id, name_time_features):
 
 # user_id is the user that we check if the chunk belongs to him
 def build_test_samples(user_id, name_time_features):
-    with open('../FileCenter/all_user_chunks', 'rb') as fp:
+    with open('../FileCenter/minimzed_data/all_user_chunks', 'rb') as fp:
         all_user_chunks = pkl.load(fp)
     test_samples = []
     for i in range(0, len(all_user_chunks)):

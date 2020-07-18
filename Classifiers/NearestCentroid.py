@@ -15,7 +15,7 @@ def predict(user_id):
     predicted = clf.predict(x_test)
     print(pd.Series(predicted[:431]).value_counts())
     print(pd.Series(predicted[431:]).value_counts())
-    with open('../FileCenter/predicted_NearestCentroid', 'wb') as fp:
+    with open('../FileCenter/classifiers_predictions/predicted_NearestCentroid', 'wb') as fp:
         pickle.dump(predicted, fp)
 
 
