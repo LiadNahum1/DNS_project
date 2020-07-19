@@ -1,12 +1,14 @@
 from Classifiers.KNearestNeighbors import KNearestNeighbors
 from Classifiers.NearestCentroid import NearestCentroid
 from Classifiers.NeuralNetwork import NeuralNetwork
-from Classifiers.RandomForest import RandomForest
+from Classifiers.RandomForest import RandomForest, NUM_OF_ESTIMATORS
+from FeatureExtraction.analyze_name_time_data import extract_features
+from FeatureExtraction.analyze_name_time_data import build_chunk_30_minutes
+
 from Classifiers.SVC import SVC
 import pyshark
 import pandas as pd
 import os
-
 
 KNEAREST_NEIGHBORS_IND = 0
 NEAREST_CENTROID_IND = 1
@@ -19,48 +21,53 @@ userIps = [("173.27.225.202", 1), ("173.27.225.197", 2), ("173.27.225.182", 3), 
            ("173.27.225.126", 9), ("173.27.225.118", 10), ("173.27.225.116", 11),
            ("173.27.225.115", 12), ("173.27.225.113", 13), ("173.27.225.111", 14), ("173.27.225.102", 15)]
 
-
 classifiers = [KNearestNeighbors(), NearestCentroid(), NeuralNetwork(), RandomForest(), SVC()]
 
 
-
-def checkMyIp(x):
+def check_ip(x):
     for ip in userIps:
         if x == ip[0]:
             return ip[1]
     raise Exception("Ip not part of the organization")  # Alert admin
 
 
-def applyClassifier():
-    # TODO : apply the classifier on the chunck
-    return 1
+def apply_classifier(chunk, user_id):
+    train_set = pd.read_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_train_features.csv')
+    clf = RandomForestClassifier(n_estimators=NUM_OF_ESTIMATORS)
+    x_train = train_set.iloc[:, :-1]
+    clf.fit(x_train, train_set['label'])
+    x_test = build_features_for_chunk(user_id, chunk)
+    predicted = clf.predict(x_test)
+    return predicted
 
 
-def create_chunck(user_csv):
-
+def create_chunk(user_csv, id):
+    extract_features(user_csv)
+    user_data = pd.read_csv("user_extracted" + id)
+    chunk = build_chunk_30_minutes(user_data)
+    return chunk
 
 
 def alert(id):
     raise Exception("Alert admin" + id)
 
 
-def checkUser(id):
+def check_user(id):
     user_csv = pd.read_csv("user" + id + "csv")
-    chunck = create_chunck(user_csv)
-    ident = applyClassifier(chunck)
+    chunk = create_chunk(user_csv, id)
+    ident = apply_classifier(chunk, id)
     if ident != id:
         alert(id)
-
-
 
 
 def add_to_file(filename, row):
     with open(filename, 'a') as fd:
         fd.write(row)
 
-def add_to_user(pkt) :
+
+def add_to_user(pkt):
     curr_ip = pkt['ip.src']
-    user = checkMyIp(curr_ip)
+    user = check_ip(curr_ip)
     if user == 1:
         add_to_file("user1.csv", pkt)
     if user == 2:
@@ -93,34 +100,32 @@ def add_to_user(pkt) :
         add_to_file("user15.csv", pkt)
 
 
-
-
-def backup_and_clean_csvs() :
-    #currently just clean the csvs . possible to
-    #create secondaty backup inorder to mantain data
+def backup_and_clean_csvs():
+    # currently just clean the csvs . possible to
+    # create secondaty backup inorder to mantain data
     # for future retraining of the model
     i = 1
     while i <= 15:
         os.remove("user" + i + ".csv")
 
-def check_users():
-    checkUser(1)
-    checkUser(2)
-    checkUser(3)
-    checkUser(4)
-    checkUser(5)
-    checkUser(6)
-    checkUser(7)
-    checkUser(8)
-    checkUser(9)
-    checkUser(10)
-    checkUser(11)
-    checkUser(12)
-    checkUser(13)
-    checkUser(14)
-    checkUser(15)
-    backup_and_clean_csvs()
 
+def check_users():
+    check_user(1)
+    check_user(2)
+    check_user(3)
+    check_user(4)
+    check_user(5)
+    check_user(6)
+    check_user(7)
+    check_user(8)
+    check_user(9)
+    check_user(10)
+    check_user(11)
+    check_user(12)
+    check_user(13)
+    check_user(14)
+    check_user(15)
+    backup_and_clean_csvs()
 
 
 def save_and_check(pkt):
@@ -132,14 +137,12 @@ def save_and_check(pkt):
 
 
 def recorder():
-    #Using pyshark to receive wireshark information
+    # Using pyshark to receive wireshark information
     while True:
         capture = pyshark.LiveCapture(interface='eth0')
-        capture.sniff(timeout=1800)  #timeout in seconds ( 30 min = 1800 sec )
+        capture.sniff(timeout=1800)  # timeout in seconds ( 30 min = 1800 sec )
         capture.apply_on_packets(save_and_check, timeout=1800)
-
 
 
 if __name__ == '__main__':
     recorder()
-
