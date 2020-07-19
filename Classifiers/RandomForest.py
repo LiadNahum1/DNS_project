@@ -54,5 +54,4 @@ class RandomForest(Classifier, ABC):
 
 if __name__ == '__main__':
     rf = RandomForest()
-    #rf.write_train_test_sets__with_fisher_score(0, 0.5)
-    rf.predict(0)
+    rf.plot_graphs()
