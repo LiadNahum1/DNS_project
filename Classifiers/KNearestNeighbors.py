@@ -4,6 +4,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from Classifiers.classifier import Classifier
 from FeatureExtraction.name_time_features import *
 import pickle
+from sklearn.metrics import plot_confusion_matrix
 
 
 class KNearestNeighbors(Classifier):
@@ -11,10 +12,12 @@ class KNearestNeighbors(Classifier):
     def predict(self, user_id):
         train_set = pd.read_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_train_features.csv')
         test_set = pd.read_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_test_features.csv')
-        clf = KNeighborsClassifier(n_neighbors=100)
+        clf = KNeighborsClassifier(n_neighbors=50)
         x_train = train_set.iloc[:, :-1]
         clf.fit(x_train, train_set['label'])
         x_test = test_set.iloc[:, :-1]
+        plot_confusion_matrix(clf, x_test, test_set['label'], normalize='true')  # doctest: +SKIP
+        plt.show()
         predicted = clf.predict(x_test)
         print(pd.Series(predicted[:431]).value_counts())
         print(pd.Series(predicted[431:]).value_counts())
@@ -43,3 +46,7 @@ class KNearestNeighbors(Classifier):
         plt.xlabel('K Value')
         plt.ylabel('Mean Error')
         plt.show()
+
+if __name__ == '__main__':
+    nc = KNearestNeighbors()
+    nc.predict(0)
