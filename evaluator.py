@@ -32,13 +32,7 @@ def check_ip(x):
 
 
 def apply_classifier(chunk, user_id):
-    train_set = pd.read_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_train_features.csv')
-    clf = RandomForestClassifier(n_estimators=NUM_OF_ESTIMATORS)
-    x_train = train_set.iloc[:, :-1]
-    clf.fit(x_train, train_set['label'])
-    x_test = build_features_for_chunk(user_id, chunk)
-    predicted = clf.predict(x_test)
-    return predicted
+    return RandomForest().predict(chunk, user_id)
 
 
 def create_chunk(user_csv, id):
