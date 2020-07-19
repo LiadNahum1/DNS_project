@@ -62,7 +62,8 @@ class Classifier:
                     test_samples.append(features_for_chunk)
         return test_samples
 
-    def write_train_test_sets(self, user_id):
+    #if fisher_score_threshold == -1 then without a fisher score
+    def write_train_test_sets(self, user_id, fisher_score_threshold = -1):
         name_time_features = NameTimeFeatures()
         features_names = name_time_features.get_features_of_user(user_id)
 
@@ -73,27 +74,13 @@ class Classifier:
         test_samples = self._build_test_samples(user_id, name_time_features)
         test_set = pd.DataFrame(data=test_samples, columns=features_names)
 
-        # write into files
-        train_set.to_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_train_features.csv')
-        test_set.to_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_test_features.csv')
-
-    def write_train_test_sets__with_fisher_score(self, user_id, fisher_score_threshold):
-        name_time_features = NameTimeFeatures()
-        features_names = name_time_features.get_features_of_user(user_id)
-
-        features_names.append('label')
-        train_samples = self._build_train_samples(user_id, name_time_features)
-        train_set = pd.DataFrame(data=train_samples, columns=features_names)
-
-        test_samples = self._build_test_samples(user_id, name_time_features)
-        test_set = pd.DataFrame(data=test_samples, columns=features_names)
-
-        # features selection by fisher score
-        indexes_by_fisher_score = fisher_score_selection(train_set, fisher_score_threshold)
-        label_column_index = len(train_set.columns) - 1
-        indexes_by_fisher_score.append(label_column_index)
-        train_set = train_set.iloc[:, indexes_by_fisher_score]
-        test_set = test_set.iloc[:, indexes_by_fisher_score]
+        if fisher_score_threshold > -1:
+            # features selection by fisher score
+            indexes_by_fisher_score = fisher_score_selection(train_set, fisher_score_threshold)
+            label_column_index = len(train_set.columns) - 1
+            indexes_by_fisher_score.append(label_column_index)
+            train_set = train_set.iloc[:, indexes_by_fisher_score]
+            test_set = test_set.iloc[:, indexes_by_fisher_score]
 
         # write into files
         train_set.to_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_train_features.csv')
@@ -106,3 +93,5 @@ class Classifier:
     @abstractmethod
     def plot_graphs(self, user_id):
         pass
+
+
