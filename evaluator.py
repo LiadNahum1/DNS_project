@@ -32,7 +32,11 @@ def check_ip(x):
 
 
 def apply_classifier(id):
-    return RandomForest().predict(id)
+    predictions = RandomForest().predict(id)
+    if predictions[0] == 1:
+        return id
+    else:
+        return 0
 
 
 def create_chunk(user_csv, id):
