@@ -20,10 +20,9 @@ class NeuralNetwork(Classifier):
         plot_confusion_matrix(clf, x_test, test_set['label'], normalize='true')  # doctest: +SKIP
         plt.show()
         predicted = clf.predict(x_test)
-        print(pd.Series(predicted[:431]).value_counts())
-        print(pd.Series(predicted[431:]).value_counts())
         with open('../FileCenter/predicted_MPL', 'wb') as fp:
             pickle.dump(predicted, fp)
+        return predicted
 
     # plot best mpl
     def plot_graphs(self, user_id):

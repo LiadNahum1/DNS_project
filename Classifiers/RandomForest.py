@@ -26,6 +26,7 @@ class RandomForest(Classifier, ABC):
             pickle.dump(predicted, fp)
         plot_confusion_matrix(clf, x_test, test_set['label'], normalize='true')
         plt.show()
+        return predicted
 
     # plot best fisher score threshold for random forest
     def plot_graphs(self, user_id):
@@ -48,14 +49,6 @@ class RandomForest(Classifier, ABC):
             confusion_matrix_list.append(cm)
             if i == -1:
                 fisher_score_threshold[4] = len(x_train.columns)
-            print(train_set.shape)
-            print(pd.Series(pred_i[:431]).value_counts())
-            print(pd.Series(pred_i[431:]).value_counts())
-            print(np.mean(pred_i != y_test))
-            print(f'tp{cm[1][1]}')
-            print(f'fp{cm[0][1]}')
-            print(f'tn{cm[0][0]}')
-            print(f'fn{cm[1][0]}')
             error_rate.append(np.mean(pred_i != y_test))
         self._plot_error_rate(fisher_score_threshold, error_rate)
         self._plot_confusion_matrix(fisher_score_threshold, confusion_matrix_list)
