@@ -9,7 +9,7 @@ from Classifiers.classifier import Classifier
 from FeatureExtraction.name_time_features import *
 
 
-class SVC(Classifier, ABC):
+class SVCClassifier(Classifier, ABC):
 
     def predict(self, user_id):
         train_set = pd.read_csv(f'../FileCenter/FeaturesPerUser/user{user_id}_train_features.csv')
@@ -25,3 +25,7 @@ class SVC(Classifier, ABC):
         print(pd.Series(predicted[431:]).value_counts())
         with open('../FileCenter/classifiers_predictions/predicted_SVC', 'wb') as fp:
             pickle.dump(predicted, fp)
+
+if __name__ == '__main__':
+    nc = SVCClassifier()
+    nc.predict(0)
