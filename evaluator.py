@@ -31,15 +31,14 @@ def check_ip(x):
     raise Exception("Ip not part of the organization")  # Alert admin
 
 
-def apply_classifier(chunk):
-    return RandomForest().predict(chunk)
+def apply_classifier(id):
+    return RandomForest().predict(id)
 
 
 def create_chunk(user_csv, id):
     extract_features(user_csv)
     user_data = pd.read_csv("user_extracted" + id)
-    chunk = build_chunk_30_minutes(user_data)
-    return chunk
+    build_chunk_30_minutes(user_data)
 
 
 def alert(id):
@@ -48,8 +47,8 @@ def alert(id):
 
 def check_user(id):
     user_csv = pd.read_csv("user" + id + "csv")
-    chunk = create_chunk(user_csv, id)
-    ident = apply_classifier(chunk)
+    create_chunk(user_csv, id)
+    ident = apply_classifier(id)
     if ident != id:
         alert(id)
 
