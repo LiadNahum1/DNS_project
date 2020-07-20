@@ -127,7 +127,6 @@ def save_and_check(pkt):
         add_to_user(pkt)
     elif pkt.dns.resp_name:
         add_to_user(pkt)
-    check_users()
 
 
 def recorder():
@@ -136,6 +135,7 @@ def recorder():
         capture = pyshark.LiveCapture(interface='eth0')
         capture.sniff(timeout=1800)  # timeout in seconds ( 30 min = 1800 sec )
         capture.apply_on_packets(save_and_check, timeout=1800)
+        check_users()
 
 
 if __name__ == '__main__':
